@@ -43,8 +43,12 @@ fn apply_command(command: Command, pos: Pos) -> Pos {
             d: pos.d + pos.a * val,
             a: pos.a,
         },
-        Command::DepthMove(val) => Pos{h:pos.h, d:pos.d, a:pos.a + val},
-        Command::BadCommand => Pos{h:0, d:0, a:0},
+        Command::DepthMove(val) => Pos {
+            h: pos.h,
+            d: pos.d,
+            a: pos.a + val,
+        },
+        Command::BadCommand => Pos { h: 0, d: 0, a: 0 },
     }
 }
 
@@ -60,7 +64,7 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let data_file_path = &args[1];
     let commands = read_commands(data_file_path);
-    let final_pos = apply_commands(commands, Pos{h:0, d:0,a:0});
+    let final_pos = apply_commands(commands, Pos { h: 0, d: 0, a: 0 });
     println!("Final position is {:?}", final_pos);
     println!("answer is {}", final_pos.h * final_pos.d);
 }
