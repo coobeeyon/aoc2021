@@ -49,43 +49,54 @@ fn score_board(called_num: i32, board: &Board) -> i32 {
     sum * called_num
 }
 
+fn read_boards(data_file_path: &String) -> (Vec<i32>, Boards) {
+    let lines = read_lines(data_file_path);
+
+    (
+        lines[0].split(',').map(|ns| ns.parse::<i32>().unwrap()).collect(),
+        lines
+            .iter()
+            .skip(1)
+            .chunks(6)
+            .into_iter()
+            .map(|chunk| {
+                chunk
+                    .skip(1)
+                    .map(|r| {
+                        r.split_whitespace()
+                            .map(|ns| (ns.parse::<i32>().unwrap(), false))
+                            .collect()
+                    })
+                    .collect()
+            })
+            .collect(),
+    )
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let data_file_path = &args[1];
-    let lines = read_lines(data_file_path);
+    let (numbers, mut boards) = read_boards(data_file_path);
 
-    let numbers = lines[0].split(',').map(|ns| ns.parse::<i32>().unwrap());
-    let mut boards: Boards = lines
-        .iter()
-        .skip(1)
-        .chunks(6)
-        .into_iter()
-        .map(|chunk| {
-            chunk
-                .skip(1)
-                .map(|r| {
-                    r.split_whitespace()
-                        .map(|ns| (ns.parse::<i32>().unwrap(), false))
-                        .collect()
-                })
-                .collect()
-        })
-        .collect();
-
-    let mut winner: Option<(i32, Board)> = None;
+    let mut winners: Vec<(i32, Board)> = Vec::new();
     for n in numbers {
         for board in &mut boards {
             mark_number(n, board);
+        }
+        boards.retain(|board| {
             if is_winner(&board) {
-                winner = Some((n, board.clone()));
-                break;
+                winners.push((n, board.clone()));
+                false
+            } else {
+                true
             }
-        }
-        if let Some(_) = winner {
-            break;
-        }
+        });
     }
-    if let Some((n, board)) = winner {
-        println!("The winning score is {}", score_board(n, &board));
+
+    if let Some((n, board)) = winners.first() {
+        println!("The first winning score is {}", score_board(*n, &board));
+    }
+    if let Some((n, board)) = winners.last() {
+        println!("The last winning score is {}", score_board(*n, &board));
     }
 }
