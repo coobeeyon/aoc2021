@@ -17,25 +17,32 @@ fn main() {
     let data_file_path = &args[1];
     let lines = read_lines(data_file_path);
 
-    let fish_days: Vec<i32> = lines
+    let initial_pop: Vec<usize> = lines
         .into_iter()
         .flat_map(|s| {
             s.split(',')
-                .map(|ns| ns.parse::<i32>().unwrap())
+                .map(|ns| ns.parse::<usize>().unwrap())
                 .collect::<Vec<_>>()
         })
         .collect();
+    let mut fish_pop: Vec<u64> = vec![0; 9];
+    initial_pop.into_iter().for_each(|n| fish_pop[n] += 1);
 
-    let ddays: Vec<Vec<_>> = iterate(fish_days, |days| {
-        days.iter()
-            .flat_map(|day| match day {
-                0 => vec![6, 8],
-                _ => vec![day - 1],
-            })
-            .collect()
+    let pop: Vec<_> = iterate(fish_pop, |l| {
+        let mut ln = l.clone();
+        ln.rotate_left(1);
+        ln[6] += ln[8];
+        ln
     })
-    .take(81)
+    .take(257)
     .collect();
 
-    println!("ddays is {:?}", ddays.last().unwrap().len());
+    println!(
+        "After 80 days there are {} fish",
+        pop[80].iter().sum::<u64>()
+    );
+    println!(
+        "After 256 days there are {} fish",
+        pop[256].iter().sum::<u64>()
+    );
 }
